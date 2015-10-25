@@ -1,22 +1,27 @@
 package optile.de.dropbox.integration;
 
-import static org.junit.Assert.assertEquals;
+import optile.de.dropbox.Main;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
 
-import optile.de.dropbox.Main;
 
-@Ignore
 public class MainTest {
 	//used for console output testing
 	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 	private final ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+
+    @Rule
+    public final TextFromStandardInputStream systemInMock
+            = emptyStandardInputStream();
 	
 	
 	@Before
@@ -37,12 +42,15 @@ public class MainTest {
 	@Test
 	public void testMainShouldReturnValidResult() {
 		//IMPORTANT: sensitive data used on purpose
+        systemInMock.provideText("1\n2\n");
 		String[] args = new String[]{"auth", "dngveq8kufelfcm", "7w8xut73ut5qs22"};
 		Main.main(args);
 		assertEquals(mockedResponse(), outContent.toString());
 		//no error logs
 		assertEquals("",errContent.toString());		
 	}
+
+
 	
 	private String mockedResponse() {
 		return "application should have at least two arguments! Available comands (M - mandatory):\nauth {appKey}M {appSecret}M"
