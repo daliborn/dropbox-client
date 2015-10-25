@@ -43,16 +43,11 @@ public class MainTest {
 	}
 	
 	@Test
-	public void testMainShouldReturnValidResult() throws IOException {
-        String resourceName = "config.properties"; // could also be a constant
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        Properties props = new Properties();
-        try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
-            props.load(resourceStream);
-        }
+	public void testMainAuthShouldReturnValidResult() throws IOException {
+        Properties props = getProperties();
 
 
-        systemInMock.provideText(props.getProperty("token"));
+        systemInMock.provideText(props.getProperty("authorizathioncode"));
 		String[] args = new String[]{"auth", props.getProperty("appkey"), props.getProperty("appsecret")};
 		Main.main(args);
 		assertEquals(validAuthResponse(), outContent.toString());
@@ -60,11 +55,32 @@ public class MainTest {
 		assertEquals("",errContent.toString());		
 	}
 
-    private String validAuthResponse(){
+    @Test
+    public void testMainInfoShouldReturnValidResult() throws IOException {
+        Properties props = getProperties();
+
+        String[] args = new String[]{"info", props.getProperty("token")};
+        Main.main(args);
+        assertEquals(validAuthResponse(), outContent.toString());
+        //no error logs
+        assertEquals("",errContent.toString());
+    }
+
+    private Properties getProperties() throws IOException {
+        String resourceName = "config.properties"; // could also be a constant
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Properties props = new Properties();
+        try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
+            props.load(resourceStream);
+        }
+        return props;
+    }
+
+    private String validAuthResponse() throws IOException {
        return "1. Go to: https://www.dropbox.com/1/oauth2/authorize?locale=en_US&client_id=dngveq8kufelfcm&response_type=code\n" +
         "2. Click \"Allow\" (you might have to log in first)\n" +
         "3. Copy the authorization code.\n" +
-        "token is verified! null";
+        "token is verified! " + "null";
     }
 	
 	private String mockedResponse() {
