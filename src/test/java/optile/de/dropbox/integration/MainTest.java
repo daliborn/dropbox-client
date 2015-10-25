@@ -66,6 +66,17 @@ public class MainTest {
         assertEquals("",errContent.toString());
     }
 
+    @Test
+    public void testMainListShouldReturnValidResult() throws IOException {
+        Properties props = getProperties();
+
+        String[] args = new String[]{"list", props.getProperty("token"), props.getProperty("file")};
+        Main.main(args);
+        assertEquals(validAuthResponse(), outContent.toString());
+        //no error logs
+        assertEquals("",errContent.toString());
+    }
+
     private Properties getProperties() throws IOException {
         String resourceName = "config.properties"; // could also be a constant
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
