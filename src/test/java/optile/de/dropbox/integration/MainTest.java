@@ -8,7 +8,10 @@ import org.junit.Test;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.contrib.java.lang.system.TextFromStandardInputStream.emptyStandardInputStream;
@@ -40,17 +43,29 @@ public class MainTest {
 	}
 	
 	@Test
-	public void testMainShouldReturnValidResult() {
-		//IMPORTANT: sensitive data used on purpose
-        systemInMock.provideText("1\n2\n");
-		String[] args = new String[]{"auth", "dngveq8kufelfcm", "7w8xut73ut5qs22"};
+	public void testMainShouldReturnValidResult() throws IOException {
+        String resourceName = "config.properties"; // could also be a constant
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        Properties props = new Properties();
+        try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
+            props.load(resourceStream);
+        }
+
+
+        systemInMock.provideText(props.getProperty("token"));
+		String[] args = new String[]{"auth", props.getProperty("appkey"), props.getProperty("appsecret")};
 		Main.main(args);
-		assertEquals(mockedResponse(), outContent.toString());
+		assertEquals(validAuthResponse(), outContent.toString());
 		//no error logs
 		assertEquals("",errContent.toString());		
 	}
 
-
+    private String validAuthResponse(){
+       return "1. Go to: https://www.dropbox.com/1/oauth2/authorize?locale=en_US&client_id=dngveq8kufelfcm&response_type=code\n" +
+        "2. Click \"Allow\" (you might have to log in first)\n" +
+        "3. Copy the authorization code.\n" +
+        "token is verified! null";
+    }
 	
 	private String mockedResponse() {
 		return "application should have at least two arguments! Available comands (M - mandatory):\nauth {appKey}M {appSecret}M"
