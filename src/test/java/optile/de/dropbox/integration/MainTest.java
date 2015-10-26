@@ -1,6 +1,7 @@
 package optile.de.dropbox.integration;
 
 import optile.de.dropbox.Main;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -44,7 +45,7 @@ public class MainTest {
 	
 	@Test
 	public void testMainAuthShouldReturnValidResult() throws IOException {
-        Properties props = getProperties();
+        Properties props = getProperties("config.properties");
 
 
         systemInMock.provideText(props.getProperty("authorizathioncode"));
@@ -57,18 +58,19 @@ public class MainTest {
 
     @Test
     public void testMainInfoShouldReturnValidResult() throws IOException {
-        Properties props = getProperties();
+        Properties props = getProperties("config.properties");
 
         String[] args = new String[]{"info", props.getProperty("token")};
         Main.main(args);
-        assertEquals(validAuthResponse(), outContent.toString());
+
+        assertEquals(getFileTestValues("inforesponse"), outContent.toString());
         //no error logs
         assertEquals("",errContent.toString());
     }
 
     @Test
     public void testMainListShouldReturnValidResult() throws IOException {
-        Properties props = getProperties();
+        Properties props = getProperties("config.properties");
 
         String[] args = new String[]{"list", props.getProperty("token"), props.getProperty("file")};
         Main.main(args);
@@ -77,14 +79,21 @@ public class MainTest {
         assertEquals("",errContent.toString());
     }
 
-    private Properties getProperties() throws IOException {
-        String resourceName = "config.properties"; // could also be a constant
+    private Properties getProperties(String resourceName) throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         Properties props = new Properties();
         try(InputStream resourceStream = loader.getResourceAsStream(resourceName)) {
             props.load(resourceStream);
         }
         return props;
+    }
+
+    private String getFileTestValues(String resourceName) throws IOException {
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+        return IOUtils.toString(
+                loader.getResourceAsStream(resourceName),
+                "UTF-8");
     }
 
     private String validAuthResponse() throws IOException {
