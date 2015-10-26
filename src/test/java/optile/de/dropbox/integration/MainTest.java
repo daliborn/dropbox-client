@@ -74,7 +74,7 @@ public class MainTest {
 
         String[] args = new String[]{"list", props.getProperty("token"), props.getProperty("file")};
         Main.main(args);
-        assertEquals(validAuthResponse(), outContent.toString());
+        assertEquals(getFileTestValues("listresponse"), outContent.toString());
         //no error logs
         assertEquals("",errContent.toString());
     }
